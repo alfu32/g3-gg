@@ -3,6 +3,7 @@ import { expect, test } from "bun:test";
 
 // Import the functions to test
 import { generateTypeScriptCodeFromSVG,flattenSVG, getStyle  } from "./convert-svg-to-gg.ts";
+import jsdom from "jsdom";
 
 // Test cases for the generateTypeScriptCodeFromSVG function
 test("Generated TypeScript code for SVG circle element", () => {
@@ -15,7 +16,7 @@ test("Generated TypeScript code for SVG circle element", () => {
 };
 const ctx = new_context(cfg);
 
-ctx.draw_circle_filled(50, 50, 40, gx.Color{r: red, stroke_color: black});
+ctx.draw_circle_filled(50, 50, 40, gx.Color{r: red, stroke_color: black, });
 `;
     expect(generateTypeScriptCodeFromSVG(svgDocument)).toBe(expectedCode);
 });
@@ -30,7 +31,7 @@ test("Generated TypeScript code for SVG rect element", () => {
 };
 const ctx = new_context(cfg);
 
-ctx.draw_rect_filled(20, 100, 100, 50, gx.Color{r: blue});
+ctx.draw_rect_filled(20, 100, 100, 50, gx.Color{r: blue, });
 `;
     expect(generateTypeScriptCodeFromSVG(svgDocument)).toBe(expectedCode);
 });
@@ -45,7 +46,7 @@ test("Generated TypeScript code for SVG ellipse element", () => {
 };
 const ctx = new_context(cfg);
 
-ctx.draw_ellipse_filled(150, 150, 40, 30, gx.Color{r: green});
+ctx.draw_ellipse_filled(150, 150, 40, 30, gx.Color{r: green, });
 `;
     expect(generateTypeScriptCodeFromSVG(svgDocument)).toBe(expectedCode);
 });
@@ -60,7 +61,7 @@ test("Generated TypeScript code for SVG polyline element", () => {
 };
 const ctx = new_context(cfg);
 
-ctx.draw_poly_empty([[10, 10], [20, 30], [30, 15]], gx.Color{stroke_color: black});
+ctx.draw_poly_empty([f64(10),10,20,30,30,15], gx.Color{r: none, stroke_color: black, });
 `;
     expect(generateTypeScriptCodeFromSVG(svgDocument)).toBe(expectedCode);
 });
@@ -75,14 +76,14 @@ test("Generated TypeScript code for SVG text element", () => {
 };
 const ctx = new_context(cfg);
 
-ctx.draw_text(50, 50, "Hello, TypeScript!", gx.TextCfg{font: "bold 16px Arial", r: red});
+ctx.draw_text(50, 50, "Hello, TypeScript!", gx.TextCfg{r: red, font: "bold 16px Arial", });
 `;
     expect(generateTypeScriptCodeFromSVG(svgDocument)).toBe(expectedCode);
 });
 
 test("Generated TypeScript code for SVG img element", () => {
     const svgDocument = `<svg width="200" height="200">
-        <img x="100" y="100" width="50" height="50" href="image.jpg" />
+        <img x="100" y="100" width="50" height="50" href="image.jpg"/>
     </svg>`;
     const expectedCode = `const cfg: Config = {
     width: 200,
@@ -104,15 +105,17 @@ test("Flatten SVG structure", () => {
         <g style="fill: blue">
             <rect x="20" y="100" width="100" height="50" />
         </g>
+        <img x="100" y="100" width="50" height="50" href="image.jpg" />
     </svg>`;
     const expectedSVG = `<svg width="200" height="200">
         <circle cx="50" cy="50" r="40" style="fill: red; stroke: black" />
         <rect x="20" y="100" width="100" height="50" style="fill: blue" />
+        <img x="100" y="100" width="50" height="50" href="image.jpg" />
     </svg>`;
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(svgDocument, 'image/svg+xml');
-    const svg = doc.getElementsByTagName('svg')[0];
-    flattenSVG(svg);
+    // Parse the SVG document
+    const dom = new jsdom.JSDOM(svgDocument);
+    const svg = dom.window.document.querySelector('svg')!!;
+    flattenSVG(svg,svg);
     expect(svg.outerHTML).toBe(expectedSVG);
 });
 

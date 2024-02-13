@@ -3,12 +3,11 @@ export function generateTypeScriptCodeFromSVG(svgDocument: string): string {
     let tsCode = '';
 
     // Parse the SVG document
-    const parser = new DOMParser();
     const dom = new jsdom.JSDOM(svgDocument);
     const svg = dom.window.document.querySelector('svg')!!;
 
     // Flatten SVG structure by inlining styles and classes from parent groups
-    flattenSVG(svg);
+    flattenSVG(svg,svg);
 
     // Extract width and height from SVG element
     const width = parseFloat(svg.getAttribute('width')!);
@@ -20,6 +19,7 @@ export function generateTypeScriptCodeFromSVG(svgDocument: string): string {
     height: ${height},
 };\n`;
     tsCode += `const ctx = new_context(cfg);\n\n`;
+    // tsCode += `// children: ${svg.children.length}\n\n`;
 
     // Iterate through each child element of the SVG
     for (const element of Array.from(svg.children)) {
@@ -29,7 +29,7 @@ export function generateTypeScriptCodeFromSVG(svgDocument: string): string {
         for (const attr of Array.from((element as Element).attributes)) {
             attributes[attr.name] = attr.value;
         }
-
+        // tsCode += `/// fcode generated for <${elementType} ${JSON.stringify(attributes).replace(/"/gi,"")}/>`
         // Generate TypeScript code based on element type
         switch (elementType) {
             case 'circle':
@@ -43,8 +43,17 @@ export function generateTypeScriptCodeFromSVG(svgDocument: string): string {
                 break;
             case 'polyline':
                 // Assuming points attribute is formatted as "x1,y1 x2,y2 x3,y3 ..."
-                const points = attributes.points.split(' ').map(point => point.split(',').map(parseFloat));
-                tsCode += `ctx.draw_poly_empty(${points}, gx.Color{${getStyle(element as Element)}});\n`;
+                const points = attributes.points
+                    .split(' ')
+                    .map(point => point.split(',').map(parseFloat))
+                    .flatMap(n => n);
+                tsCode += `ctx.draw_poly_empty([${points.map((d,i) => {
+                    if(i==0) {
+                        return `f64(${d})`
+                    } else {
+                        return `${d}`
+                    }
+                }).join(",")}], gx.Color{${getStyle(element as Element)}});\n`;
                 break;
             case 'text':
                 tsCode += `ctx.draw_text(${attributes.x}, ${attributes.y}, "${(element as Element).textContent}", gx.TextCfg{${getStyle(element as Element)}});\n`;
@@ -53,6 +62,8 @@ export function generateTypeScriptCodeFromSVG(svgDocument: string): string {
                 // Assuming image source is encoded in href attribute
                 tsCode += `ctx.draw_image(${attributes.x}, ${attributes.y}, ${attributes.width}, ${attributes.height}, load_image("${attributes.href}"));\n`;
                 break;
+            default :
+                tsCode += `// unhandled element ${elementType} ${JSON.stringify(attributes).replace(/"/gi,"")} ;\n`;
             // Handle other SVG elements similarly
         }
     }
@@ -60,7 +71,7 @@ export function generateTypeScriptCodeFromSVG(svgDocument: string): string {
     return tsCode;
 }
 
-export function flattenSVG(element: Element) {
+export function flattenSVG(element: Element,svg: Element) {
     // Inline styles and classes from parent groups
     if (element.tagName.toLowerCase() === 'g') {
         for (const child of Array.from(element.children)) {
@@ -71,7 +82,8 @@ export function flattenSVG(element: Element) {
                     (child as Element).setAttribute('class', `${(child as Element).getAttribute('class') || ''} ${attr.value}`);
                 }
             }
-            flattenSVG(child as Element);
+            svg.appendChild(child)
+            flattenSVG(child as Element,svg);
         }
     }
 }
