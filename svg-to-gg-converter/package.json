@@ -2,6 +2,9 @@
   "name": "svg-to-gg-converter",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "test": "node-ts test *.spec.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
