@@ -14,7 +14,7 @@ pub type ShapeDrawer = fn(self ReactiveShapeEntity, ctx gg.Context,frame time.Ti
 pub struct ReactiveShapeEntity{
 	id string=rand.uuid_v4()
 	pub mut:
-	game_ref &Game = unsafe{nil}
+	game_ref &Scene = unsafe{nil}
 	position Vector2d
 	radius f64
 	color gg.Color
