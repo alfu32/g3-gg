@@ -82,9 +82,12 @@ ctx.draw_text(50, 50, "Hello, TypeScript!", gx.TextCfg{r: red, font: "bold 16px 
 });
 
 test("Generated TypeScript code for SVG img element", () => {
-    const svgDocument = `<svg width="200" height="200">
+    const svgDocument = `
+    <svg width="200" height="200">
         <img x="100" y="100" width="50" height="50" href="image.jpg"/>
-    </svg>`;
+        <image x="100" y="100" width="50" height="50" href="image.jpg"/>
+    </svg>
+    `;
     const expectedCode = `const cfg: Config = {
     width: 200,
     height: 200,
@@ -105,12 +108,10 @@ test("Flatten SVG structure", () => {
         <g style="fill: blue">
             <rect x="20" y="100" width="100" height="50" />
         </g>
-        <img x="100" y="100" width="50" height="50" href="image.jpg" />
     </svg>`;
     const expectedSVG = `<svg width="200" height="200">
         <circle cx="50" cy="50" r="40" style="fill: red; stroke: black" />
         <rect x="20" y="100" width="100" height="50" style="fill: blue" />
-        <img x="100" y="100" width="50" height="50" href="image.jpg" />
     </svg>`;
     // Parse the SVG document
     const dom = new jsdom.JSDOM(svgDocument);
@@ -121,6 +122,17 @@ test("Flatten SVG structure", () => {
 
 // Test cases for the getStyle function
 test("Extract fill, stroke, and font styles", () => {
+    const svgDocument = `<svg width="200" height="200">
+        <g>
+            <circle cx="50" cy="50" r="40" style="fill: red; stroke: black" />
+        </g>
+        <g style="fill: blue">
+            <rect x="20" y="100" width="100" height="50" />
+        </g>
+    </svg>`;
+    // Parse the SVG document
+    const dom = new jsdom.JSDOM(svgDocument);
+    const svg = dom.window.document.querySelector('svg')!!;
     const element = document.createElement('circle');
     element.setAttribute('style', 'fill: red; stroke: black; font: bold 16px Arial');
     const expectedStyle = `r: red, stroke_color: black, font: "bold 16px Arial", `;

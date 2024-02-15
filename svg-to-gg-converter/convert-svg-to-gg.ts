@@ -1,4 +1,10 @@
 import jsdom from "jsdom"
+
+const log = function(...args:any[]) {
+    let place = ((new Error()).stack?.split("\n").slice(2,4)||[]).map(t => t.substring(7));
+    let time = new Date().toISOString()
+    console.log(place,time,...args)
+}
 export function generateTypeScriptCodeFromSVG(svgDocument: string): string {
     let tsCode = '';
 
@@ -7,7 +13,7 @@ export function generateTypeScriptCodeFromSVG(svgDocument: string): string {
     const svg = dom.window.document.querySelector('svg')!!;
 
     // Flatten SVG structure by inlining styles and classes from parent groups
-    flattenSVG(svg,svg);
+    //flattenSVG(svg,svg);
 
     // Extract width and height from SVG element
     const width = parseFloat(svg.getAttribute('width')!);
@@ -20,9 +26,10 @@ export function generateTypeScriptCodeFromSVG(svgDocument: string): string {
 };\n`;
     tsCode += `const ctx = new_context(cfg);\n\n`;
     // tsCode += `// children: ${svg.children.length}\n\n`;
-
+    const translatableElements = Array.from(svg.querySelectorAll("image,circle,rect,ellipse,polyline,text,img"))
+    log("found elements",translatableElements.map(n => n.tagName))
     // Iterate through each child element of the SVG
-    for (const element of Array.from(svg.children)) {
+    for (const element of translatableElements) {
         // Extract element type and attributes
         const elementType = (element as Element).tagName.toLowerCase();
         const attributes: { [key: string]: string } = {};
@@ -112,4 +119,4 @@ const svgDocument = `<svg width="200" height="200">
 </svg>`;
 
 const tsCode = generateTypeScriptCodeFromSVG(svgDocument);
-console.log(tsCode);
+log(tsCode);
