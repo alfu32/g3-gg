@@ -29,7 +29,7 @@ fn main() {
 		}
 		animations: [
 			fn(mut e &g3.ReactiveShapeEntity, ctx gg.Context,frame time.Time) {
-				e.radius=10.0+5*f64(frame.unix & u8(0x40))/64.0
+				//e.radius=10.0+5*f64(frame.unix & u8(0x40))/64.0
 				e.position.x+=e.speed_vector.x
 				if e.position.x < 0 {
 					e.position.x=0
@@ -58,7 +58,7 @@ fn main() {
 		}
 		radius: 10.0
 		speed_vector: g3.Vector2d{10,10,0}
-		color: gx.color_from_string("#0033CC")
+		color: gx.color_from_string("#00CC33")
 		draw_shape:fn(self g3.ReactiveShapeEntity, ctx gg.Context,frame time.Time){
 			ctx.draw_circle_filled(f32(self.position.x),f32(self.position.y),f32(self.radius),self.color)
 		}
@@ -72,7 +72,6 @@ fn main() {
 		fn(mut e &g3.ReactiveShapeEntity, ev &gg.Event){
 			if ev.key_code == gg.KeyCode.up {
 				e.position.y-=e.speed_vector.y
-
 			}
 			if ev.key_code == gg.KeyCode.down {
 				e.position.y+=e.speed_vector.y
@@ -97,11 +96,11 @@ fn main() {
 		speed_vector: g3.Vector2d{10,10,0}
 		color: gx.color_from_string("#0033CC")
 		draw_shape:fn(self g3.ReactiveShapeEntity, ctx gg.Context,frame time.Time){
-			ctx.draw_circle_filled(f32(self.position.x),f32(self.position.y),f32(self.radius),self.color)
+			ctx.draw_rect_filled(f32(self.position.x-self.radius),f32(self.position.y-self.radius),f32(2*self.radius),f32(2*self.radius),self.color)
 		}
 		animations: [
 			fn(mut e &g3.ReactiveShapeEntity, ctx gg.Context,frame time.Time) {
-				e.radius=10.0+5*f64(frame.unix & u8(0x40))/64.0
+				//e.radius=10.0+5*f64(frame.unix & u8(0x40))/64.0
 				e.position.x+=e.speed_vector.x
 				if e.position.x < 0 {
 					e.position.x=0

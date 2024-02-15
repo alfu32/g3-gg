@@ -2,7 +2,7 @@ module g3
 
 pub fn entity_init() {
 	b := init_test_ball()
-	mut g:= Game{}
+	mut g:= Scene{}
 	mut e:= Entity(b)
 	g.add_entity(mut &e)
 

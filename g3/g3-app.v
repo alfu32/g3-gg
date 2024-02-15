@@ -7,7 +7,7 @@ import datatypes
 @[heap]
 pub struct App{
 	pub mut:
-	game &Game = unsafe{nil}
+	game &Scene = unsafe{nil}
 	ctx &gg.Context = unsafe{nil}
 	current_frame time.Time
 	key_codes map[gg.KeyCode]u32
