@@ -72,7 +72,6 @@ fn main() {
 		fn(mut e &g3.ReactiveShapeEntity, ev &gg.Event){
 			if ev.key_code == gg.KeyCode.up {
 				e.position.y-=e.speed_vector.y
-
 			}
 			if ev.key_code == gg.KeyCode.down {
 				e.position.y+=e.speed_vector.y
