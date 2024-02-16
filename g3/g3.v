@@ -7,6 +7,11 @@ import time
 pub interface Entity{
 	mut:
 		game_ref &Scene
+		position Vector2d
+		prev_position Vector2d
+		current_frame time.Time
+		prev_frame time.Time
+		life i64
 		is_finished(ctx gg.Context,frame time.Time) bool
 		render(mut ctx gg.Context,frame time.Time) !
 		animate(ctx gg.Context,mut scene &Scene,kb_state map[gg.KeyCode]u32,frame time.Time) !

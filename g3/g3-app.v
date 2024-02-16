@@ -37,6 +37,7 @@ pub fn (mut a App) frame_fn(mut ctx gg.Context) {
 	ctx.begin()
 	a.scene.animate(ctx,a.key_codes,a.current_frame) or {}
 	a.scene.render(mut ctx,a.current_frame) or {}
+	a.scene.collect_dead_entities(ctx,a.current_frame) or {}
 	ctx.end()
 }
 pub fn (mut a App) event_fn(ev &gg.Event, data voidptr) {

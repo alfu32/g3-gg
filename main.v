@@ -34,11 +34,12 @@ fn reactive_shape_animation__move_right_on_key(key_code gg.KeyCode)  g3.EntityAn
 	}
 }
 
-fn reactive_shape__create_object_on_key(key_code gg.KeyCode,prototype g3.ReactiveShapeEntity)g3.EntityAnimation{
-	return fn[key_code,prototype](mut e &g3.ReactiveShapeEntity,mut scene &g3.Scene, kb_state map[gg.KeyCode]u32 ,ctx gg.Context,frame time.Time) {
+fn reactive_shape__create_object_on_key(key_code gg.KeyCode,prototype g3.ReactiveShapeEntity, init_speed g3.Vector2d)g3.EntityAnimation{
+	return fn[key_code,prototype, init_speed](mut e &g3.ReactiveShapeEntity,mut scene &g3.Scene, kb_state map[gg.KeyCode]u32 ,ctx gg.Context,frame time.Time) {
 		if key_code in kb_state.keys() {
 			mut cp := prototype.copy()
 			cp.position=e.position.copy()
+			cp.speed_vector = e.get_actual_speed()
 			scene.add_entity(mut cp)
 		}
 	}
@@ -152,9 +153,11 @@ fn main() {
 			y: 30.0
 		}
 		radius: 3.0
+		life: 2000
 		speed_vector: g3.Vector2d{7,1,0}
 		color: gx.color_from_string("#333377")
 		draw_shape:fn(self g3.ReactiveShapeEntity, mut ctx gg.Context,frame time.Time){
+			// ctx.draw_text(int(self.position.x-2*self.radius),int(self.position.y-2*self.radius-10),"life:${self.life}",gx.TextCfg{color:gx.color_from_string("#333333")})
 			ctx.draw_rect_filled(f32(self.position.x),f32(self.position.y),f32(10),f32(3),self.color)
 		}
 		animations: [
@@ -178,6 +181,9 @@ fn main() {
 					e.speed_vector.y*=-1
 				}
 			}
+			fn(mut e &g3.ReactiveShapeEntity,mut scene &g3.Scene, kb_state map[gg.KeyCode]u32 ,ctx gg.Context,frame time.Time) {
+				e.life=e.life - 1
+			}
 		]
 	}
 	mut player1 := &g3.ReactiveShapeEntity{
@@ -196,11 +202,25 @@ fn main() {
 			reactive_shape_animation__move_down_on_key(gg.KeyCode.down)
 			reactive_shape_animation__move_left_on_key(gg.KeyCode.left)
 			reactive_shape_animation__move_right_on_key(gg.KeyCode.right)
-			reactive_shape__create_object_on_key(gg.KeyCode.space,bullet)
+			reactive_shape__create_object_on_key(gg.KeyCode.space,bullet,g3.Vector2d{5,0,0})
 		]
 	}
-	player1.event_listeners['key_down'] = []
 	app.scene.add_entity(mut player1)
+	mut feed := &g3.ReactiveShapeEntity{
+		position: g3.Vector2d{
+			x: 10.0
+			y: 10.0
+		}
+		radius: 10000.0
+		speed_vector: g3.Vector2d{0,0,0}
+		color: gx.color_from_string("#00CC33")
+		draw_shape:fn(self g3.ReactiveShapeEntity, mut ctx gg.Context,frame time.Time){
+			ctx.draw_text(int(self.position.x),int(self.position.y),"entities:${self.game_ref.entities.len}",gx.TextCfg{color:gx.color_from_string("#333333")})
+		}
+		animations: [
+		]
+	}
+	app.scene.add_entity(mut feed)
 	app.run()
 }
 

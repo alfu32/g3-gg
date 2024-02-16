@@ -13,23 +13,34 @@ pub type ShapeDrawer = fn(self ReactiveShapeEntity,mut ctx gg.Context,frame time
 pub struct ReactiveShapeEntity{
 	id string=rand.uuid_v4()
 	pub mut:
-	game_ref &Scene = unsafe{nil}
+	prev_position Vector2d
 	position Vector2d
+	prev_frame time.Time
+	current_frame time.Time
+	game_ref &Scene = unsafe{nil}
 	radius f64
 	color gg.Color
 	speed_vector Vector2d
-	current_frame time.Time
 	animations []EntityAnimation
 	event_listeners map[string][]EventListener
 	draw_shape ShapeDrawer
-	life u64 = 1000
+	life i64 = 1000
+}
+pub fn (e ReactiveShapeEntity) get_actual_speed() Vector2d{
+	a:=e.prev_position
+	b:=e.position
+	return Vector2d{
+		x: b.x-a.x
+		y: b.y-a.y
+		z: b.z-a.z
+	}
 }
 pub fn (e ReactiveShapeEntity) render(mut ctx gg.Context,frame time.Time) ! {
 	//ctx.draw_circle_filled(f32(e.position.x),f32(e.position.y),f32(e.radius),e.color)
 
 	e.draw_shape(e,mut ctx,frame)
 }
-pub fn (e ReactiveShapeEntity) is_finished(ctx gg.Context,frame time.Time) bool { return false }
+pub fn (e ReactiveShapeEntity) is_finished(ctx gg.Context,frame time.Time) bool { return e.life < 0 }
 pub fn (mut e ReactiveShapeEntity) animate(ctx gg.Context,mut scene &Scene,kb_state map[gg.KeyCode]u32,frame time.Time) ! {
 	for a in e.animations {
 		a(mut &e,mut scene, kb_state, ctx, frame)
