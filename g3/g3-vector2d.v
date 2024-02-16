@@ -6,3 +6,11 @@ pub struct Vector2d{
 	y f64
 	z f64
 }
+
+pub fn(v Vector2d) copy() Vector2d {
+	return Vector2d{
+		x: v.x
+		y: v.y
+		z: v.z
+	}
+}

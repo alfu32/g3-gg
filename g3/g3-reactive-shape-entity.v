@@ -2,14 +2,13 @@ module g3
 
 import gg
 import gx
-import math
 import rand
 import time
 
 
 pub type EventListener = fn(mut self &ReactiveShapeEntity, ev &gg.Event)
-pub type EntityAnimation = fn(mut self &ReactiveShapeEntity, ctx gg.Context, frame time.Time)
-pub type ShapeDrawer = fn(self ReactiveShapeEntity, ctx gg.Context,frame time.Time)
+pub type EntityAnimation = fn(mut self &ReactiveShapeEntity,mut scene &Scene, kb_state map[gg.KeyCode]u32 ,ctx gg.Context, frame time.Time)
+pub type ShapeDrawer = fn(self ReactiveShapeEntity,mut ctx gg.Context,frame time.Time)
 @[heap]
 pub struct ReactiveShapeEntity{
 	id string=rand.uuid_v4()
@@ -23,15 +22,17 @@ pub struct ReactiveShapeEntity{
 	animations []EntityAnimation
 	event_listeners map[string][]EventListener
 	draw_shape ShapeDrawer
+	life u64 = 1000
 }
-pub fn (e ReactiveShapeEntity) render(ctx gg.Context,frame time.Time) ! {
+pub fn (e ReactiveShapeEntity) render(mut ctx gg.Context,frame time.Time) ! {
 	//ctx.draw_circle_filled(f32(e.position.x),f32(e.position.y),f32(e.radius),e.color)
-	e.draw_shape(e,ctx,frame)
+
+	e.draw_shape(e,mut ctx,frame)
 }
 pub fn (e ReactiveShapeEntity) is_finished(ctx gg.Context,frame time.Time) bool { return false }
-pub fn (mut e ReactiveShapeEntity) animate(ctx gg.Context,frame time.Time) ! {
+pub fn (mut e ReactiveShapeEntity) animate(ctx gg.Context,mut scene &Scene,kb_state map[gg.KeyCode]u32,frame time.Time) ! {
 	for a in e.animations {
-		a(mut &e, ctx, frame)
+		a(mut &e,mut scene, kb_state, ctx, frame)
 	}
 }
 pub fn (e ReactiveShapeEntity) get_box() Box{
@@ -54,6 +55,21 @@ pub fn (mut e ReactiveShapeEntity) dispatch_event(ev &gg.Event){
 		for listener in listeners {
 			listener(mut &e,ev)
 		}
+	}
+}
+pub fn (e ReactiveShapeEntity) copy() &ReactiveShapeEntity{
+	return &ReactiveShapeEntity{
+		id: rand.uuid_v4()
+		game_ref: e.game_ref
+		position: e.position.copy()
+		radius: e.radius
+		color: e.color
+		speed_vector: e.speed_vector.copy()
+		current_frame: e.current_frame
+		animations: e.animations
+		event_listeners: e.event_listeners
+		draw_shape: e.draw_shape
+		life: e.life
 	}
 }
 pub fn create_test_ball() &ReactiveShapeEntity {
