@@ -2,6 +2,9 @@ module g3
 
 import gg
 import time
+import arrays
+
+
 
 
 @[heap]
@@ -54,6 +57,19 @@ pub fn (g Scene) do_collisions() {
 }
 pub fn (mut g Scene) collect_dead_entities(ctx gg.Context,frame time.Time) ! {
 	mut dead_entities:=[]int{}
+	for {
+		mut next:=-1
+		for i,mut e in g.entities {
+			if e.is_finished(ctx,frame) {
+				next=i
+				break
+			}
+		}
+		if next == -1 {
+			break
+		}
+		g.entities.delete(next)
+	}
 	for i,mut e in g.entities {
 		if e.is_finished(ctx,frame) {
 			dead_entities << i
