@@ -7,8 +7,19 @@ import time
 
 
 pub type EventListener = fn(mut self &ReactiveShapeEntity, ev &gg.Event)
-pub type EntityAnimation = fn(mut self &ReactiveShapeEntity,mut scene &Scene, kb_state map[gg.KeyCode]u32 ,ctx gg.Context, frame time.Time)
+pub type AnimationFunction = fn(mut self &ReactiveShapeEntity,mut scene &Scene, kb_state map[gg.KeyCode]u32 ,ctx gg.Context, frame time.Time)
+pub type EntityKeyboardAnimationFunction = fn(mut self &ReactiveShapeEntity,kb_state map[gg.KeyCode]u32)
+pub type EntityAnimationFunction = fn(mut self &ReactiveShapeEntity, frame time.Time)
+pub type ContextAnimationFunction = fn(mut self &ReactiveShapeEntity,ctx gg.Context, frame time.Time)
+pub type ContextKeyboardAnimationFunction = fn(mut self &ReactiveShapeEntity,kb_state map[gg.KeyCode]u32,ctx gg.Context, frame time.Time)
+pub type SceneAnimationFunction = fn(mut self &ReactiveShapeEntity,mut scene &Scene, frame time.Time)
+pub type SceneKeyboardAnimationFunction = fn(mut self &ReactiveShapeEntity,mut scene &Scene,kb_state map[gg.KeyCode]u32)
+pub type EntityAnimation = AnimationFunction | EntityKeyboardAnimationFunction | EntityAnimationFunction |
+	ContextAnimationFunction | ContextKeyboardAnimationFunction | SceneAnimationFunction |
+	SceneKeyboardAnimationFunction
 pub type ShapeDrawer = fn(self ReactiveShapeEntity,mut ctx gg.Context,frame time.Time)
+
+
 @[heap]
 pub struct ReactiveShapeEntity{
 	id string=rand.uuid_v4()
@@ -43,7 +54,29 @@ pub fn (e ReactiveShapeEntity) render(mut ctx gg.Context,frame time.Time) ! {
 pub fn (e ReactiveShapeEntity) is_finished(ctx gg.Context,frame time.Time) bool { return e.life < 0 }
 pub fn (mut e ReactiveShapeEntity) animate(ctx gg.Context,mut scene &Scene,kb_state map[gg.KeyCode]u32,frame time.Time) ! {
 	for a in e.animations {
-		a(mut &e,mut scene, kb_state, ctx, frame)
+		match a {
+			AnimationFunction {
+				a(mut &e,mut scene, kb_state, ctx, frame)
+			}
+			EntityKeyboardAnimationFunction {
+				a(mut &e,kb_state)
+			}
+			EntityAnimationFunction {
+				a(mut &e, frame)
+			}
+			ContextAnimationFunction {
+				a(mut &e,ctx, frame)
+			}
+			ContextKeyboardAnimationFunction {
+				a(mut &e,kb_state, ctx, frame)
+			}
+			SceneAnimationFunction {
+				a(mut &e,mut scene, frame)
+			}
+			SceneKeyboardAnimationFunction {
+				a(mut &e,mut scene, kb_state)
+			}
+		}
 	}
 }
 pub fn (e ReactiveShapeEntity) get_box() Box{
@@ -81,6 +114,19 @@ pub fn (e ReactiveShapeEntity) copy() &ReactiveShapeEntity{
 		event_listeners: e.event_listeners
 		draw_shape: e.draw_shape
 		life: e.life
+	}
+}
+pub fn (mut e ReactiveShapeEntity) on_collision(mut other &Entity) {
+	match other {
+		ReactiveShapeEntity{
+			tl := e.life
+			ol := other.life
+			e.life = tl-1
+			other.life = ol - 1
+		}
+		else{
+
+		}
 	}
 }
 pub fn create_test_ball() &ReactiveShapeEntity {

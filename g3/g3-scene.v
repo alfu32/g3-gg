@@ -4,6 +4,12 @@ import gg
 import time
 
 
+@[heap]
+pub struct CollidingEntities{
+	pub mut:
+	self &Entity
+	other &Entity
+}
 
 @[heap]
 pub struct Scene{
@@ -28,6 +34,22 @@ pub fn (mut g Scene) animate(ctx gg.Context,kb_state map[gg.KeyCode]u32 ,frame t
 		e.animate(ctx,mut &g,kb_state,frame)!
 		e.prev_position = p
 		e.prev_frame = t
+	}
+}
+pub fn (g Scene) do_collisions() {
+	mut colliding:=[][]int{}
+	for i,a in g.entities {
+		for j in i+1 .. g.entities.len {
+			b:= g.entities[j]
+			if a.get_box().intersects(b.get_box()) {
+				colliding << [i,j]
+			}
+		}
+	}
+	for mut collision in colliding {
+		mut a:= g.entities[collision[0]]
+		mut b:= g.entities[collision[1]]
+		a.on_collision(mut b)
 	}
 }
 pub fn (mut g Scene) collect_dead_entities(ctx gg.Context,frame time.Time) ! {

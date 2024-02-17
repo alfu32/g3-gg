@@ -27,6 +27,8 @@ pub fn (mut a App) init_ctx(
 		window_title : window_title
 		frame_fn: a.frame_fn
 		event_fn: a.event_fn
+		ui_mode: false
+
 	}
 	mut ctx := gg.new_context(cfg2)
 	a.ctx=ctx
@@ -36,6 +38,7 @@ pub fn (mut a App) frame_fn(mut ctx gg.Context) {
 	a.current_frame=time.now()
 	ctx.begin()
 	a.scene.animate(ctx,a.key_codes,a.current_frame) or {}
+	a.scene.do_collisions()
 	a.scene.render(mut ctx,a.current_frame) or {}
 	a.scene.collect_dead_entities(ctx,a.current_frame) or {}
 	ctx.end()
