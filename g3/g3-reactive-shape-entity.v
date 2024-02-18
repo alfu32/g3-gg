@@ -33,6 +33,7 @@ pub struct ReactiveShapeEntity{
 	color gg.Color
 	speed_vector Vector2d
 	life i64 = 1000
+	xdata voidptr
 	animations []EntityAnimation
 	event_listeners map[string][]EventListener
 	draw_shape ShapeDrawer

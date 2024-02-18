@@ -75,7 +75,7 @@ fn init_app() &g3.App{
 		400,
 		'Polygons',
 	)
-	app.scene.add_entity(mut &g3.ReactiveShapeEntity{
+	mut player0:=&g3.ReactiveShapeEntity{
 		position: g3.Vector2d{
 			x: 10.0
 			y: 10.0
@@ -111,7 +111,8 @@ fn init_app() &g3.App{
 				}
 			}
 		]
-	})
+	}
+	app.scene.add_entity(mut player0)
 
 
 	mut player2 := &g3.ReactiveShapeEntity{
@@ -303,7 +304,11 @@ fn init_app() &g3.App{
 		speed_vector: g3.Vector2d{0,0,0}
 		color: gx.color_from_string("#00CC33")
 		draw_shape:fn(self g3.ReactiveShapeEntity, mut ctx gg.Context,frame time.Time){
-			ctx.draw_text(int(self.position.x),int(self.position.y),"entities:${self.game_ref.entities.len}",gx.TextCfg{color:gx.color_from_string("#333333")})
+			ctx.draw_text(
+				int(self.position.x),int(self.position.y),
+				"entities:${self.game_ref.entities.len},frame:${frame}",
+				gx.TextCfg{color:gx.color_from_string("#333333")},
+			)
 		}
 	}
 	app.scene.add_entity(mut feed)
