@@ -32,10 +32,10 @@ pub struct ReactiveShapeEntity{
 	radius f64
 	color gg.Color
 	speed_vector Vector2d
+	life i64 = 1000
 	animations []EntityAnimation
 	event_listeners map[string][]EventListener
 	draw_shape ShapeDrawer
-	life i64 = 1000
 }
 pub fn (e ReactiveShapeEntity) get_actual_speed() Vector2d{
 	a:=e.prev_position

@@ -40,19 +40,32 @@ pub fn (mut g Scene) animate(ctx gg.Context,kb_state map[gg.KeyCode]u32 ,frame t
 	}
 }
 pub fn (g Scene) do_collisions() {
+	t0:=time.now()
 	mut colliding:=[][]int{}
+	lla1:
 	for i,a in g.entities {
 		for j in i+1 .. g.entities.len {
 			b:= g.entities[j]
 			if a.get_box().intersects(b.get_box()) {
 				colliding << [i,j]
 			}
+			t1:=time.now()
+			if t1.nanosecond - t0.nanosecond > 40000 {
+				break lla1
+			}
 		}
 	}
+
+	lla2:
 	for mut collision in colliding {
+
 		mut a:= g.entities[collision[0]]
 		mut b:= g.entities[collision[1]]
 		a.on_collision(mut b)
+		t1:=time.now()
+		if t1.nanosecond - t0.nanosecond > 40000 {
+			break lla2
+		}
 	}
 }
 pub fn (mut g Scene) collect_dead_entities(ctx gg.Context,frame time.Time) ! {

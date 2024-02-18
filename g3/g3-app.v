@@ -4,6 +4,8 @@ import time
 import gg
 import datatypes
 
+
+
 @[heap]
 pub struct App{
 	pub mut:
